@@ -1,0 +1,98 @@
+<?php
+
+/**
+ * @file
+ * GSB AZ filter.
+ */
+
+/**
+ * Implements hook_library().
+ */
+function gsb_az_filter_library() {
+  // Library One.
+  $libraries['gsb_az_filter'] = array(
+    'title' => 'GSB AZ Filter',
+    'website' => 'https://github.com/gsbitse/gsb_az_filter',
+    'version' => '1.0',
+    'js' => array(
+      drupal_get_path('module', 'gsb_az_filter') . '/js/gsb_az_filter.js' => array(),
+    ),
+  );
+  return $libraries;
+}
+
+/**
+ * Implements hook_form_FORM_ID_alter() for views_exposed_form().
+ */
+function gsb_az_filter_form_views_exposed_form_alter(&$form, &$form_state, $form_id) {
+  // This is an array keyed by view machine name, with the value being the
+  // name of the form item being replaced.
+  $views = array(
+    'faculty_filters' => 'last_name',
+  );
+
+  // If this view has a form item specified, and it exists in the form.
+  if (isset($form[$views[$form_state['view']->name]])) {
+    // Find the form item being replaced.
+    $form_item_name = $views[$form_state['view']->name];
+
+    // Determine the active letter, and remove it from the query string.
+    $query = drupal_get_query_parameters();
+    $active_letter = isset($query[$form_item_name]) ? $query[$form_item_name] : '';
+    unset($query[$form_item_name]);
+
+    // Make an array of all letters, starting with an 'All' reset link.
+    $values[''] = t('All');
+    $values += drupal_map_assoc(range('A', 'Z'));
+
+    // Build an array of links.
+    $items = array();
+    foreach ($values as $letter => $text) {
+      $attributes = array(
+        'class' => array(
+          'gsb-az-filter',
+        ),
+        'data-gsb-az-filter-letter' => $letter,
+      );
+
+      // If this is not the 'All' link, add the query string.
+      if ($letter != '') {
+        $query[$form_item_name] = $letter;
+      }
+
+      // Mark the active link.
+      if ($active_letter == $letter) {
+        $attributes['class'][] = 'active';
+      }
+      $items[$letter] = l($text, '', array('query' => $query, 'attributes' => $attributes, 'external' => TRUE));
+    }
+
+    // Add a new form element to display the A-Z list.
+    $form["gsb_az_filter_$form_item_name"] = array(
+      '#theme' => 'item_list',
+      '#items' => $items,
+      '#suffix' =>  '<div class="prev"></div>',
+      '#prefix' => '<div class="next"></div>',
+      '#attached' => array(
+        'library' => array(
+          array('gsb_az_filter', 'gsb_az_filter'),
+        ),
+        'js' => array(
+          array(
+            'type' => 'setting',
+            'data' => array(
+              'gsb_az_filter' => array(
+                'form_item_name' => $form_item_name,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    // Replace the original element with a hidden value.
+    $form[$form_item_name] = array(
+      '#type' => 'hidden',
+      '#default_value' => $active_letter,
+    );
+  }
+}
