@@ -9,7 +9,6 @@
  * Implements hook_library().
  */
 function gsb_az_filter_library() {
-  // Library One.
   $libraries['gsb_az_filter'] = array(
     'title' => 'GSB AZ Filter',
     'website' => 'https://github.com/gsbitse/gsb_az_filter',
@@ -46,53 +45,85 @@ function gsb_az_filter_form_views_exposed_form_alter(&$form, &$form_state, $form
     $values += drupal_map_assoc(range('A', 'Z'));
 
     // Build an array of links.
-    $items = array();
+    $links = array();
     foreach ($values as $letter => $text) {
-      $attributes = array(
-        'class' => array(
-          'gsb-az-filter',
+      $links[$letter] = array(
+        'title' => $text,
+        'href' => '',
+        'query' => $query,
+        'external' => TRUE,
+        'attributes' => array(
+          'class' => array(
+            'gsb-az-filter',
+          ),
+          'data-gsb-az-filter-letter' => $letter,
         ),
-        'data-gsb-az-filter-letter' => $letter,
       );
 
       // If this is not the 'All' link, add the query string.
       if ($letter != '') {
-        $query[$form_item_name] = $letter;
+        $links[$letter]['query'][$form_item_name] = $letter;
       }
 
       // Mark the active link.
       if ($active_letter == $letter) {
-        $attributes['class'][] = 'active';
+        $links[$letter]['attributes']['class'][] = 'active';
       }
-      $items[$letter] = l($text, '', array('query' => $query, 'attributes' => $attributes, 'external' => TRUE));
     }
 
     // Add a new form element to display the A-Z list.
     $form["gsb_az_filter_$form_item_name"] = array(
-      '#theme' => 'item_list',
-      '#items' => $items,
-      '#suffix' =>  '<div class="prev"></div>',
-      '#prefix' => '<div class="next"></div>',
-      '#attached' => array(
-        'library' => array(
-          array('gsb_az_filter', 'gsb_az_filter'),
+      'prev' => array(
+        '#type' => 'container',
+        '#attributes' => array(
+          'class' => array(
+            'prev',
+          ),
         ),
-        'js' => array(
-          array(
-            'type' => 'setting',
-            'data' => array(
-              'gsb_az_filter' => array(
-                'form_item_name' => $form_item_name,
+      ),
+      'links' => array(
+        '#theme' => 'links',
+        '#links' => $links,
+        '#attributes' => array(
+          'class' => array(
+            'inline',
+          ),
+        ),
+        '#attached' => array(
+          'library' => array(
+            array('gsb_az_filter', 'gsb_az_filter'),
+          ),
+          'js' => array(
+            array(
+              'type' => 'setting',
+              'data' => array(
+                'gsb_az_filter' => array(
+                  'form_item_name' => $form_item_name,
+                ),
               ),
             ),
           ),
         ),
       ),
+      'next' => array(
+        '#type' => 'container',
+        '#attributes' => array(
+          'class' => array(
+            'next',
+          ),
+        ),
+      ),
     );
+
     // Replace the original element with a hidden value.
     $form[$form_item_name] = array(
       '#type' => 'hidden',
       '#default_value' => $active_letter,
+    );
+
+    // Tell Views that our filter exists.
+    $form['#info']['filter-gsb_az_filter'] = array(
+      'value' => "gsb_az_filter_$form_item_name",
     );
   }
 }
