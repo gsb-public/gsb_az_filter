@@ -77,6 +77,7 @@ function gsb_az_filter_form_views_exposed_form_alter(&$form, &$form_state, $form
         '#type' => 'container',
         '#attributes' => array(
           'class' => array(
+            'prev-next',
             'prev',
           ),
         ),
@@ -84,11 +85,6 @@ function gsb_az_filter_form_views_exposed_form_alter(&$form, &$form_state, $form
       'links' => array(
         '#theme' => 'links',
         '#links' => $links,
-        '#attributes' => array(
-          'class' => array(
-            'inline',
-          ),
-        ),
         '#attached' => array(
           'library' => array(
             array('gsb_az_filter', 'gsb_az_filter'),
@@ -109,6 +105,8 @@ function gsb_az_filter_form_views_exposed_form_alter(&$form, &$form_state, $form
         '#type' => 'container',
         '#attributes' => array(
           'class' => array(
+            'enabled',
+            'prev-next',
             'next',
           ),
         ),
@@ -122,7 +120,7 @@ function gsb_az_filter_form_views_exposed_form_alter(&$form, &$form_state, $form
     );
 
     // Tell Views that our filter exists.
-    $form['#info']['filter-gsb_az_filter'] = array(
+    $form['#info']['filter-gsb-az-filter'] = array(
       'value' => "gsb_az_filter_$form_item_name",
     );
   }
