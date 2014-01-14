@@ -77,6 +77,7 @@ function gsb_az_filter_form_views_exposed_form_alter(&$form, &$form_state, $form
         '#type' => 'container',
         '#attributes' => array(
           'class' => array(
+            'disabled',
             'prev-next',
             'prev',
           ),
@@ -105,7 +106,6 @@ function gsb_az_filter_form_views_exposed_form_alter(&$form, &$form_state, $form
         '#type' => 'container',
         '#attributes' => array(
           'class' => array(
-            'enabled',
             'prev-next',
             'next',
           ),

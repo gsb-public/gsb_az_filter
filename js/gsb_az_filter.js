@@ -38,7 +38,7 @@ Drupal.behaviors.gsbAzFilterLinks = {
  */
 Drupal.behaviors.gsbAzFilterSlider = {
   attach: function () {
-    var $wrapper = $('#edit-gsb-az-filter-last-name-wrapper');
+    var $wrapper = $('.views-widget-filter-gsb-az-filter');
     var $slider = $wrapper.find('ul');
     var $prev = $wrapper.find('.prev');
     var $next = $wrapper.find('.next');
@@ -61,9 +61,17 @@ Drupal.behaviors.gsbAzFilterSlider = {
       buttonClick(this, 1);
     });
 
+    /**
+     * Reacts to a button click to move the slider.
+     *
+     * @param el
+     *   The button element that was clicked.
+     * @param directional_multiplier
+     *   The direction the slider should move, either -1 or 1.
+     */
     function buttonClick(el, directional_multiplier) {
       // If the button is disabled, prevent clicking.
-      if (!$(el).hasClass('enabled') || $slider.is(':animated')) {
+      if ($(el).hasClass('disabled') || $slider.is(':animated')) {
         return;
       }
 
@@ -75,14 +83,14 @@ Drupal.behaviors.gsbAzFilterSlider = {
       click += directional_multiplier;
 
       if (click == 0) {
-        $prev.removeClass('enabled');
+        $prev.addClass('disabled');
       }
       else if (click == max_click) {
-        $next.removeClass('enabled');
+        $next.addClass('disabled');
       }
       else {
-        $prev.addClass('enabled');
-        $next.addClass('enabled');
+        $prev.removeClass('disabled');
+        $next.removeClass('disabled');
       }
     }
   }
