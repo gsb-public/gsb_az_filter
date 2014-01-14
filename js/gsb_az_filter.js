@@ -89,15 +89,15 @@ Drupal.GsbAzFilterSlider = function (element) {
 
     self.click += directional_multiplier;
 
+    // Remove disabled class from both ends when in the middle.
+    self.$prev.removeClass('disabled');
+    self.$next.removeClass('disabled');
+
     if (self.click == 0) {
       self.$prev.addClass('disabled');
     }
     else if (self.click == self.max_click) {
       self.$next.addClass('disabled');
-    }
-    else {
-      self.$prev.removeClass('disabled');
-      self.$next.removeClass('disabled');
     }
   }
 
