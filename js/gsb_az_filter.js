@@ -6,30 +6,27 @@
  * Transform a set of A-Z links to update via AJAX.
  */
 Drupal.behaviors.gsbAzFilterLinks = {
-  attach: function (context, settings) {
-    // Find the input element that needs to be updated.
-    var $input = $("[name='" + settings.gsb_az_filter.form_item_name + "']");
-    if ($input.length) {
-      // Find all of the links.
-      var $links = $('a.gsb-az-filter');
-      // When a link is clicked...
-      $links.click(function (e) {
-        var $this = $(this);
+  attach: function () {
+    // Find all of the links.
+    $('a.gsb-az-filter').click(function (e) {
+      var $this = $(this);
+      var $input = $("[name='" + $this.data('gsb-az-filter-form-item-name') + "']");
 
-        // Set the input element to this link's letter.
-        $input.val($this.data('gsb-az-filter-letter'));
-        // Remove other active classes.
-        $links.removeClass('active');
-        // Mark this link as active.
-        $this.addClass('active');
+      // Set the input element to this link's letter.
+      $input.val($this.data('gsb-az-filter-letter'));
+      // Remove other active classes.
+      $('a.gsb-az-filter.active').removeClass('active');
+      // Mark this link as active.
+      $this.addClass('active');
 
-        // Trigger the form submission.
-        $this.closest('form').find('.ctools-auto-submit-click').click();
-
+      // Trigger the form submission.
+      var $submit_button = $this.closest('form').find('.ctools-auto-submit-click');
+      if ($submit_button.length) {
         // Prevent the browser from following the link.
+        $submit_button.click();
         e.preventDefault();
-      });
-    }
+      }
+    });
   }
 };
 
@@ -38,62 +35,73 @@ Drupal.behaviors.gsbAzFilterLinks = {
  */
 Drupal.behaviors.gsbAzFilterSlider = {
   attach: function () {
-    var $wrapper = $('.views-widget-filter-gsb-az-filter');
-    var $slider = $wrapper.find('ul');
-    var $prev = $wrapper.find('.prev');
-    var $next = $wrapper.find('.next');
+    $('.views-widget-filter-gsb-az-filter').each(function () {
+      new Drupal.GsbAzFilterSlider(this);
+    });
+  }
+};
 
-    // The single width of a slider item.
-    var single_width = $slider.find('li').eq(0).width();
-    // How many items will slide by per click
-    var items_per_click = Math.floor($slider.width() / single_width);
-    // The maximum number of times this can be clicked.
-    var max_click = Math.floor($slider.children().length / items_per_click);
-
+Drupal.GsbAzFilterSlider = function (element) {
+  var $wrapper = $(element);
+  var self = {
+    $slider: $wrapper.find('ul'),
+    $prev: $wrapper.find('.prev'),
+    $next: $wrapper.find('.next'),
     // Track the number of clicks.
-    var click = 0;
+    click: 0
+  };
 
-    $prev.click(function () {
-      buttonClick(this, -1);
-    });
+  // The single width of a slider item.
+  var single_width = self.$slider.find('li').eq(0).width();
+  // How many items will slide by per click
+  var items_per_click = Math.floor(self.$slider.width() / single_width);
 
-    $next.click(function () {
-      buttonClick(this, 1);
-    });
+  // The maximum number of times this can be clicked.
+  self.max_click = Math.floor(self.$slider.children().length / items_per_click);
+  // The visible width of the items.
+  self.visible_width = items_per_click * single_width;
 
-    /**
-     * Reacts to a button click to move the slider.
-     *
-     * @param el
-     *   The button element that was clicked.
-     * @param directional_multiplier
-     *   The direction the slider should move, either -1 or 1.
-     */
-    function buttonClick(el, directional_multiplier) {
-      // If the button is disabled, prevent clicking.
-      if ($(el).hasClass('disabled') || $slider.is(':animated')) {
-        return;
-      }
+  self.$prev.click(function () {
+    buttonClick(this, -1);
+  });
+  self.$next.click(function () {
+    buttonClick(this, 1);
+  });
 
-      // Determine how far to adjust the slider.
-      // current offset - (width of visible items * direction)
-      var offset = parseInt($slider.css('marginLeft'), 10) - (items_per_click * single_width * directional_multiplier);
-      $slider.animate({'margin-left': offset}, 500, 'swing');
+  /**
+   * Reacts to a button click to move the slider.
+   *
+   * @param {Object} el
+   *   The button element that was clicked.
+   * @param {number} directional_multiplier
+   *   The direction the slider should move, either -1 or 1.
+   */
+  function buttonClick(el, directional_multiplier) {
+    // If the button is disabled, prevent clicking.
+    if ($(el).hasClass('disabled') || self.$slider.is(':animated')) {
+      return;
+    }
 
-      click += directional_multiplier;
+    // Determine how far to adjust the slider.
+    // current offset - (width of visible items * direction)
+    var offset = parseInt(self.$slider.css('marginLeft'), 10) - (self.visible_width * directional_multiplier);
+    self.$slider.animate({'margin-left': offset}, 500, 'swing');
 
-      if (click == 0) {
-        $prev.addClass('disabled');
-      }
-      else if (click == max_click) {
-        $next.addClass('disabled');
-      }
-      else {
-        $prev.removeClass('disabled');
-        $next.removeClass('disabled');
-      }
+    self.click += directional_multiplier;
+
+    if (self.click == 0) {
+      self.$prev.addClass('disabled');
+    }
+    else if (self.click == self.max_click) {
+      self.$next.addClass('disabled');
+    }
+    else {
+      self.$prev.removeClass('disabled');
+      self.$next.removeClass('disabled');
     }
   }
+
+  $.extend(this, self);
 };
 
 })(jQuery);

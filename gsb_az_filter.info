@@ -1,3 +1,4 @@
 name = GSB AZ Filter
 core = 7.x
 package = GSB
+files[] = gsb_az_filter_plugin_display_extender_az_filter.inc
