@@ -95,9 +95,22 @@ function gsb_az_filter_form_views_exposed_form_alter(&$form, &$form_state, $form
           ),
         ),
       ),
-      'links' => array(
-        '#theme' => 'links',
-        '#links' => $links,
+      'container' => array(
+        '#type' => 'container',
+        '#attributes' => array(
+          'class' => array(
+            'container',
+          ),
+        ),
+        'links' => array(
+          '#theme' => 'links',
+          '#links' => $links,
+          '#attributes' => array(
+            'class' => array(
+              'inline',
+            ),
+          ),
+        ),
       ),
       'next' => array(
         '#type' => 'container',
