@@ -61,6 +61,15 @@ Drupal.GsbAzFilterSlider = function (element) {
   // The visible width of the items.
   self.visible_width = items_per_click * single_width;
 
+  // Get the last name char value... if any has been set
+  var last_name = $("[name='last_name']").attr('value');
+  var char_number = last_name.charCodeAt(0) - 64;
+  if (char_number != NaN) {
+    // Scroll the slider to the last name char
+    var offset = (char_number * single_width) * -1;
+    slideSlider(self, offset);
+  }
+
   self.$prev.click(function () {
     buttonClick(this, -1);
   });
@@ -81,24 +90,33 @@ Drupal.GsbAzFilterSlider = function (element) {
     if ($(el).hasClass('disabled') || self.$slider.is(':animated')) {
       return;
     }
-
     // Determine how far to adjust the slider.
     // current offset - (width of visible items * direction)
     var offset = parseInt(self.$slider.css('marginLeft'), 10) - (self.visible_width * directional_multiplier);
-    self.$slider.animate({'margin-left': offset}, 500, 'swing');
-
-    self.click += directional_multiplier;
-
-    // Remove disabled class from both ends when in the middle.
-    self.$prev.removeClass('disabled');
-    self.$next.removeClass('disabled');
-
-    if (self.click == 0) {
-      self.$prev.addClass('disabled');
+    if (offset > 0) {
+      offset = 0;
     }
-    else if (self.click == self.max_click) {
-      self.$next.addClass('disabled');
-    }
+    slideSlider(self, offset);
+  }
+
+  function slideSlider(self, offset) {
+    self.$slider.animate({'margin-left': offset}, 500, 'swing', function() {
+      // Remove disabled class from both ends when in the middle.
+      self.$prev.removeClass('disabled');
+      self.$next.removeClass('disabled');
+      var margin_left = self.$slider.css('marginLeft');
+      margin_left = margin_left.replace('px','');
+      if (margin_left == '0') {
+        self.$prev.addClass('disabled');
+      }
+      var single_width = self.$slider.find('li').eq(0).width();
+      var num_children = self.$slider.children().length;
+      var full_width = num_children * single_width;
+      var margin_and_width = Math.abs(margin_left) + self.visible_width;
+      if (margin_and_width > full_width) {
+        self.$next.addClass('disabled');
+      }
+    });
   }
 
   $.extend(this, self);
