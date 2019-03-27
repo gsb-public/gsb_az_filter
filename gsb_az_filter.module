@@ -55,8 +55,7 @@ function gsb_az_filter_form_views_exposed_form_alter(&$form, &$form_state, $form
     foreach ($values as $letter => $text) {
       $links[$letter] = array(
         'title' => $text,
-        //'href' => '',
-        'href' => ($letter != '') ? '' : '/' . current_path(),
+        'href' => ($letter != '') ? '' : '/' .drupal_lookup_path('alias',current_path()),
         'query' => $query,
         'external' => TRUE,
         'attributes' => array(
